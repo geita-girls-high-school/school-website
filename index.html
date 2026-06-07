@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form V Official Results Ledger Board</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #add8e6;
+            margin: 0;
+            padding: 20px;
+            color: #000;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .panel {
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            margin-bottom: 25px;
+        }
+
+        .header-container {
+            text-align: center;
+            color: #800080;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 25px;
+        }
+
+        .header-container h1 {
+            font-size: 24px;
+            margin: 3px 0;
+        }
+
+        .header-container h2 {
+            font-size: 18px;
+            margin: 3px 0;
+            color: #000080;
+        }
+
+        .header-container h3 {
+            font-size: 14px;
+            margin: 3px 0;
+            color: #333;
+        }
+
+        /* Admin Controls Dashboard Panel */
+        .admin-toggle {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+
+        .admin-toggle span {
+            font-size: 11px;
+            color: #777;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .admin-panel {
+            display: none;
+            border-top: 3px solid #d35400;
+            margin-top: 15px;
+            padding-top: 15px;
+            background: #fff5f0;
+            border-radius: 6px;
+            padding: 15px;
+        }
+
+        .step-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .step-card {
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+            background: #fff;
+            font-size: 12px;
+        }
+
+        button.admin-btn {
+            padding: 6px 12px;
+            font-size: 11px;
+            border: none;
+            border-radius: 3px;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            background: #2980b9;
+            margin-top: 4px;
+        }
+
+        /* Master Report Ledger Display Elements */
+        #pdfPrintCanvas {
+            background-color: #add8e6;
+            padding: 15px;
+            border-radius: 4px;
+        }
+
+        h4.table-title {
+            color: #800080;
+            margin: 20px 0 5px 0;
+            text-transform: uppercase;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fffde6;
+            margin-bottom: 25px;
+            font-size: 12px;
+            border: 1px solid #000;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #444;
+        }
+
+        th {
+            background-color: #fffde6;
+            color: #000080;
+            padding: 8px 5px;
+            font-size: 11px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        td {
+            padding: 7px 6px;
+            vertical-align: middle;
+            color: #000;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .summary-table {
+            width: 350px;
+        }
+
+        .status-badge {
+            font-weight: bold;
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            background: #e74c3c;
+            color: white;
+        }
+
+        textarea.data-box {
+            width: 100%;
+            height: 80px;
+            margin-top: 5px;
+            font-family: monospace;
+            font-size: 10px;
+        }
+
+        .download-bar {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="admin-toggle">
+            <span onclick="toggleAdminPanel()">System Administrator Login</span>
+        </div>
+
+        <div id="adminPanel" class="panel admin-panel">
+            <h3 style="margin:0 0 10px 0; color:#d35400; font-size:14px;">ADMIN DATA MANAGEMENT HUB</h3>
+            <div class="step-grid">
+                <div class="step-card">
+                    <strong>1. Student Register</strong>
+                    <button class="admin-btn" onclick="downloadRegistrationTemplate()">Get Reg Template</button>
+                    <input type="file" id="regFileInput" accept=".xlsx, .xls" onchange="uploadRegistrationFile(event)"
+                        style="margin-top:5px; font-size:10px;">
+                </div>
+                <div class="step-card">
+                    <strong>2. Subject File</strong>
+                    <select id="subjectSelector" style="font-size:11px; width:100%; margin:3px 0;">
+                        <option value="PHYSICS">Physics (Core)</option>
+                        <option value="CHEMISTRY">Chemistry (Core)</option>
+                        <option value="BIOLOGY">Biology (Core-PCB)</option>
+                        <option value="ADV_MATHS">Adv Maths (Core-PCM)</option>
+                        <option value="BAM">BAM (Minor-PCB)</option>
+                        <option value="HIST_TZ_MAADILI">Historia & Maadili</option>
+                        <option value="ACADEMIC_COMM">Academic Comm</option>
+                    </select>
+                    <button class="admin-btn" onclick="downloadSubjectTemplate()" style="background:#27ae60;">Download
+                        Sheet</button>
+                </div>
+                <div class="step-card">
+                    <strong>3. Merge Marks</strong>
+                    <input type="file" id="scoreFileInput" accept=".xlsx, .xls" onchange="uploadSubjectScoreFile(event)"
+                        style="margin-top:5px; font-size:10px;">
+                    <div id="uploadStatus" style="font-size:10px; color:#27ae60; font-weight:bold; margin-top:3px;">
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top:15px; border-top:1px solid #ccc; padding-top:10px; text-align:center;">
+                <button onclick="exportSystemDataJSON()"
+                    style="background:#800080; color:#fff; padding:6px 12px; font-size:12px; border:none; border-radius:3px; cursor:pointer; font-weight:bold;">4.
+                    Export Portal Data</button>
+                <p style="font-size:11px; color:#555; margin:5px 0;">Copy the text generated below and paste it into the
+                    code's <b>DATABASE_HOLDER</b> section to save permanently.</p>
+                <textarea id="dataOutputBox" class="data-box" readonly
+                    placeholder="Calculated system text will display here..."></textarea>
+            </div>
+        </div>
+
+        <div class="download-bar">
+            <button onclick="downloadLedgerPDF()"
+                style="background-color:#27ae60; color:white; padding:10px 20px; font-size:14px; font-weight:bold; border:none; border-radius:4px; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">Download
+                Complete Official Ledger PDF</button>
+        </div>
+
+        <div id="pdfPrintCanvas">
+            <div class="header-container">
+                <h1>Regional Administration and Local Government</h1>
+                <h2>Form V Comprehensive School Examination Ledger</h2>
+                <h3>S7342 Geita Girls Secondary School</h3>
+            </div>
+
+            <h4 class="table-title">Division Performance Summary</h4>
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th>SEX</th>
+                        <th>I</th>
+                        <th>II</th>
+                        <th>III</th>
+                        <th>IV</th>
+                        <th>0</th>
+                    </tr>
+                </thead>
+                <tbody id="summaryBody">
+                    <tr>
+                        <td colspan="6" class="center" style="background: #fff; color: #555;">No active database
+                            profiles loaded.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4 class="table-title">Detailed Performance Matrix</h4>
+            <table id="masterLedgerTable">
+                <thead>
+                    <tr>
+                        <th style="width: 10%;">CAND. NO</th>
+                        <th style="width: 10%;">PREMS NO</th>
+                        <th style="width: 25%;">NAME OF CANDIDATE</th>
+                        <th style="width: 4%;">SEX</th>
+                        <th style="width: 7%;">COMB</th>
+                        <th style="width: 4%;">POS</th>
+                        <th style="width: 5%;">AGGT</th>
+                        <th style="width: 5%;">DIV</th>
+                        <th style="width: 30%;">DETAILED SUBJECTS MAP</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody">
+                    <tr>
+                        <td colspan="9" class="center" style="background: #fff; color: #555;">The ledger board is
+                            currently empty. Please access the Administrator Hub to process and paste data records.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+        // ==========================================
+        // 🔴 THE PASTE ZONE (DATABASE_HOLDER)
+        // ==========================================
+        // Paste the text generated by the "Export Portal Data" button inside the brackets below:
+        const LIVE_STUDENT_DATABASE = [[{ "candNo": "S7342/0501", "premsNo": "202520001", "name": "ABIGAEL AGATHA BWIRE", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0502", "premsNo": "202520002", "name": "AISHA ADAM SHABAN", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0503", "premsNo": "202520003", "name": "ANASTAZIA LUCAS BUSIGA", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0504", "premsNo": "202520004", "name": "ANNA SIMON SALU", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0505", "premsNo": "202520005", "name": "ANNASTANZIA LAURIAN LUDOVICK", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0506", "premsNo": "202520006", "name": "AUGENIA WILSON MAHONGO", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0507", "premsNo": "202520007", "name": "AUGUSTINA JOSEPHAT JOSEPH", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0508", "premsNo": "202520008", "name": "COLLETA MATHIAS DEREFA", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0509", "premsNo": "202520009", "name": "ELIANA ELIAS LENALD", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0510", "premsNo": "202520010", "name": "FELISTER EMMANUEL YOHANA", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0511", "premsNo": "202520011", "name": "FILISIA FRANCIS MAPESA", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0512", "premsNo": "202520012", "name": "GETRUDA SOLEJI KAZWEGE", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0513", "premsNo": "202520013", "name": "HABIBA MASHAKA KAYUMBANO", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0514", "premsNo": "202520014", "name": "HAPPYNESS GEORGE CHARLES", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0515", "premsNo": "202520015", "name": "IRENE BARAKA OTIENO", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0516", "premsNo": "202520016", "name": "JUDITH CLAUD PASTORY", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0517", "premsNo": "202520017", "name": "LATIFA NASSORO HAMISI", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0518", "premsNo": "202520018", "name": "LOYCE MASUNGA JIDATUNDAGILE", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0519", "premsNo": "202520019", "name": "MARIAM ANDREA SAMWEL", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0520", "premsNo": "202520020", "name": "MARY JOHN PAUL", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0521", "premsNo": "202520021", "name": "NEEMA PAULO RAPHAEL", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0522", "premsNo": "202520022", "name": "PENDO ELISHA JORAM", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0523", "premsNo": "202520023", "name": "PRISCA MASHAKA MAKEJA", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0524", "premsNo": "202520024", "name": "RAHEL PENDO NDASA", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0525", "premsNo": "202520025", "name": "REHEMA PHILIMON MASAMI", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0526", "premsNo": "202520026", "name": "SARAH FAIDA SAMWELI", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0527", "premsNo": "202520027", "name": "SARAH MICHAEL MANGOLE", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0528", "premsNo": "202520028", "name": "SCHORASTICA MIHAYO AMOS", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0529", "premsNo": "202520029", "name": "SHUKRAN MAJALIWA GERALD", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0530", "premsNo": "202520030", "name": "SOPHIA MABALA BONEVENTURE", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0531", "premsNo": "202520031", "name": "SUMAYI GUJE MAKANDE", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0532", "premsNo": "202520032", "name": "SUZANA EMENUEL ANDREA", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0533", "premsNo": "202520033", "name": "TEDY MUGASA NGOROMA", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0534", "premsNo": "202520034", "name": "VAILETH RICHARD BENEDCTO", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0535", "premsNo": "202520035", "name": "VEREDIANA MAGESA AUDAX", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0536", "premsNo": "202520036", "name": "VIKTORIA ELISAMIA PETER", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0537", "premsNo": "202520037", "name": "WINFRIDA FAUSTINE MKAIKAI", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0538", "premsNo": "202520038", "name": "WINFRIDA HASIRA JULIAS", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0539", "premsNo": "202520039", "name": "WINFRIDA ZACHARIA ELIAS", "sex": "F", "comb": "PCM", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, ADV_MATHS-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0540", "premsNo": "202520040", "name": "ABIGAEL JOSEPH MOLA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0541", "premsNo": "202520041", "name": "ACQUILA ASIMWE PASCHAL", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0542", "premsNo": "202520042", "name": "ADELA OBED ENOS", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0543", "premsNo": "202520043", "name": "AGRIPINA THEODOROS MUTABAZI", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0544", "premsNo": "202520044", "name": "AISHA HILALI DAUDI", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0545", "premsNo": "202520045", "name": "AISHA MUSSA PEMBA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0546", "premsNo": "202520046", "name": "AMIDA MUSSA FAUSTINE", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0547", "premsNo": "202520047", "name": "ANASTAZIA PETER LODRICK", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0548", "premsNo": "202520048", "name": "ANGELA ELIAS KABIGILI", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0549", "premsNo": "202520049", "name": "ANGELINA EMMANUEL PAUL", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0550", "premsNo": "202520050", "name": "ANITHA KESSY MELEKA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0551", "premsNo": "202520051", "name": "ANSLA AVITUS LAZARO", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0552", "premsNo": "202520052", "name": "BHOKE ABDALAH NYAMHANGA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0553", "premsNo": "202520053", "name": "CHRISTINA DANIEL JACOBO", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0554", "premsNo": "202520054", "name": "DEARNES KAIHULA GIDEON", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0555", "premsNo": "202520055", "name": "DEBORA COSMAS MWANZALIMA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0556", "premsNo": "202520056", "name": "DEBORA RICHARD MAGESE", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0557", "premsNo": "202520057", "name": "DEVOTHA PAUL IMIJA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0558", "premsNo": "202520058", "name": "DIANA DEOGRATIAS MUGARULA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0559", "premsNo": "202520059", "name": "DINA ZEPHANIA MALALE", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0560", "premsNo": "202520060", "name": "DONATHA SEBASTIAN NAHONGANYILE", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0561", "premsNo": "202520061", "name": "EDA ISACK MNUBI", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0562", "premsNo": "202520062", "name": "ELIZABETH BUPOLO LUTUNGA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0563", "premsNo": "202520063", "name": "ELIZABETH MESHACK SHANI", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0564", "premsNo": "202520064", "name": "EMELDA CHRISTOPHER EDWIN", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0565", "premsNo": "202520065", "name": "ERGIDIA KOKWIJUKA EVODIUS", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0566", "premsNo": "202520066", "name": "ESTER DANIEL SAMSONI", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0567", "premsNo": "202520067", "name": "ESTHER ANTHONY MAGADULA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0568", "premsNo": "202520068", "name": "FATMA MOTOMOTO MOHAMED", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0569", "premsNo": "202520069", "name": "FATUMA SAID HUSEIN", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0570", "premsNo": "202520070", "name": "FROLA MATHIAS LYANGONGWA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0571", "premsNo": "202520071", "name": "GEMA MANDAWA EGNAS", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0572", "premsNo": "202520072", "name": "GLORIA SANKEY MWAKALOBO", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0573", "premsNo": "202520073", "name": "HAPPINES EMMANUEL JOMAH", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0574", "premsNo": "202520074", "name": "HAPPYNES JAMES DEUS", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0575", "premsNo": "202520075", "name": "HELENA JASTINE AMOSI", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0576", "premsNo": "202520076", "name": "HELENA MENGI ABDUL", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0577", "premsNo": "202520077", "name": "HELENA PETRO GERVAS", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0578", "premsNo": "202520078", "name": "IMAN BENJAMIN ELIKAN", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0579", "premsNo": "202520079", "name": "IRENE ARONE ALOYCE", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0580", "premsNo": "202520080", "name": "JACILINE DAUD JOHN", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0581", "premsNo": "202520081", "name": "JACKLINE ALFRED KAPONELA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0582", "premsNo": "202520082", "name": "JACKLINE JAMES MAYELO", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0583", "premsNo": "202520083", "name": "JANE OMARY THOMAS", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0584", "premsNo": "202520084", "name": "JANETH PHAUSTINE RICHARD", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0585", "premsNo": "202520085", "name": "JENIFA ABEL WAPE", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0586", "premsNo": "202520086", "name": "JENIPHER MUSSA ANTONY", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0587", "premsNo": "202520087", "name": "JERIDA MERICK JACOB", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0588", "premsNo": "202520088", "name": "JESCA PATRICK MICHAEL", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0589", "premsNo": "202520089", "name": "JOAN SILAS KAZUNGU", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0590", "premsNo": "202520090", "name": "JOVIAN JEREMIA ONYANGO", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0591", "premsNo": "202520091", "name": "JOYCE MCHUMA NYAMBOA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0592", "premsNo": "202520092", "name": "JOYCE NEMERWA PASTORY", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0593", "premsNo": "202520093", "name": "JOYCE PETER BUYUGU", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0594", "premsNo": "202520094", "name": "LEAH JEREMIA MASOLWA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0595", "premsNo": "202520095", "name": "LIDIA SIMON KADAMA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0596", "premsNo": "202520096", "name": "LIDYA DONALD PAULINE", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0597", "premsNo": "202520097", "name": "LUCIA DANIEL HEZRON", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0598", "premsNo": "202520098", "name": "LUCIA HOLLO NESTORY", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0599", "premsNo": "202520099", "name": "LUCIA MAGINA YUSUPH", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0600", "premsNo": "202520100", "name": "MARIA MATHIAS BULUGU", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0601", "premsNo": "202520101", "name": "MARIAM HELEKI GWALEMA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0602", "premsNo": "202520102", "name": "MARIAM JUMANNE BWIRE", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0603", "premsNo": "202520103", "name": "MARIAM NDAKAMA JILALA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0604", "premsNo": "202520104", "name": "MILEMBE LAMECK HOJA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0605", "premsNo": "202520105", "name": "MILIAM BRYSON NJALI", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0606", "premsNo": "202520106", "name": "MINZA SERIKALI BUKWIMBA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0607", "premsNo": "202520107", "name": "MIRIAM DAUD LUBIGISA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0608", "premsNo": "202520108", "name": "MOLA YOHANA MARWA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0609", "premsNo": "202520109", "name": "MONDESTER ADAM KISHAMAPANDA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0610", "premsNo": "202520110", "name": "MOREENE NOBERT MWENGA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0611", "premsNo": "202520111", "name": "MUNGULU MAKOMBA MAGAMBO", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0612", "premsNo": "202520112", "name": "MWANNE THABIT MUSSA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0613", "premsNo": "202520113", "name": "NADIA MUNAWWAR ADAM", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0614", "premsNo": "202520114", "name": "NEEMA KHALFAN RUSEHEYE", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0615", "premsNo": "202520115", "name": "NEEMA MASUMBUKO NKWABI", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0616", "premsNo": "202520116", "name": "NYAMITI CELESTINE KAKURU", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0617", "premsNo": "202520117", "name": "OLESTA DEUS MUSTA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0618", "premsNo": "202520118", "name": "PENDO JOEL WILLIAM", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0619", "premsNo": "202520119", "name": "PENINA ATHUMAN MWISHAGORI", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0620", "premsNo": "202520120", "name": "RACHEL PAUL SHITUNGULU", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0621", "premsNo": "202520121", "name": "RAHEL MARTINE MATHAYO", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0622", "premsNo": "202520122", "name": "RAHEL MARWA MWITA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0623", "premsNo": "202520123", "name": "RAHEL NYABWIRE MARUGU", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0624", "premsNo": "202520124", "name": "REBEKA DUBALA SHIJA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0625", "premsNo": "202520125", "name": "REGINA MASHAKA SOSPETER", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0626", "premsNo": "202520126", "name": "REHEMA DICKSON EMMANUEL", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0627", "premsNo": "202520127", "name": "REHEMA JOSEPH RULAMYE", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0628", "premsNo": "202520128", "name": "REVINA WILLIAM MLOKO", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0629", "premsNo": "202520129", "name": "RHODA KWIMA MALIMI", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0630", "premsNo": "202520130", "name": "RIGHTNESS NG'WILABUZU DAUDI", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0631", "premsNo": "202520131", "name": "RONISTER CONSTATINE BENARD", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0632", "premsNo": "202520132", "name": "ROSEMARY PHILIMON NTAUMENYA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0633", "premsNo": "202520133", "name": "ROSEMERY FELECIAN BUNDALA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0634", "premsNo": "202520134", "name": "SALIMA LUCAS AMOS", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0635", "premsNo": "202520135", "name": "SALMA HAMDU DUDU", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0636", "premsNo": "202520136", "name": "SALOME PASTORY JAMES", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0637", "premsNo": "202520137", "name": "SCOLLA MGENDI CHACHA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0638", "premsNo": "202520138", "name": "SELESTINA BATHROMEO MINSOZI", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0639", "premsNo": "202520139", "name": "SOPHIA ROSAKA MSAMBA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0640", "premsNo": "202520140", "name": "SPECIOZA LAURIAN VEDASTO", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0641", "premsNo": "202520141", "name": "SPESIOZA KIME MAKOLE", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0642", "premsNo": "202520142", "name": "STELAH PETRO MWITA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0643", "premsNo": "202520143", "name": "TABITHA EZEKIEL RAPHAEL", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0644", "premsNo": "202520144", "name": "TABU SAMSON PASCHAL", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0645", "premsNo": "202520145", "name": "TATU WILLIAM OREMBE", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0646", "premsNo": "202520146", "name": "VERONICA KOMANYA LUFUNGULO", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0647", "premsNo": "202520147", "name": "WANGARI NYAMSOGORO MTURI", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0648", "premsNo": "202520148", "name": "WITNESS FREDRICK ALOYCE", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0649", "premsNo": "202520149", "name": "YUVA MARTINE KOPA", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }, { "candNo": "S7342/0650", "premsNo": "202520150", "name": "ZILPA JUMA ODIERO", "sex": "F", "comb": "PCB", "aggt": 21, "div": "0", "formattedText": "PHYSICS-ABS, CHEMISTRY-ABS, BIOLOGY-ABS, BAM-ABS, HIST/TZ/MAADILI-ABS, ACADEMIC/COMM-ABS" }]];
+
+        // ==========================================
+        // ENGINE BLUEPRINTS & CONFIGURATIONS
+        // ==========================================
+        let globalStudentDatabase = {};
+        const combinationBlueprints = {
+            "PCM": { cores: ["PHYSICS", "CHEMISTRY", "ADV_MATHS"], minors: ["HIST_TZ_MAADILI", "ACADEMIC_COMM"] },
+            "PCB": { cores: ["PHYSICS", "CHEMISTRY", "BIOLOGY"], minors: ["BAM", "HIST_TZ_MAADILI", "ACADEMIC_COMM"] }
+        };
+
+        function scoreToLetterGrade(score) {
+            if (score === null || score === undefined || String(score).trim() === "" || String(score).toUpperCase() === "ABS") return "ABS";
+            let val = parseFloat(score);
+            if (isNaN(val)) return "ABS";
+            if (val >= 80 && val <= 100) return "A";
+            if (val >= 70 && val < 80) return "B";
+            if (val >= 60 && val < 70) return "C";
+            if (val >= 50 && val < 60) return "D";
+            if (val >= 40 && val < 50) return "E";
+            if (val >= 35 && val < 40) return "S";
+            return "F";
+        }
+        const gradePointsMap = { "A": 1, "B": 2, "C": 3, "D": 4, "E": 5, "S": 6, "F": 7, "ABS": 7 };
+
+        function toggleAdminPanel() {
+            let p = document.getElementById("adminPanel");
+            p.style.display = (p.style.display === "block") ? "none" : "block";
+        }
+
+        // --- ADMIN SYSTEM ARCHITECTURE SUB-MODULES ---
+        function downloadRegistrationTemplate() {
+            const headers = ["CAND_NO", "PREMS_NO", "NAME", "SEX", "COMBINATION"];
+            const ws = XLSX.utils.aoa_to_sheet([headers]);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Registration");
+            XLSX.writeFile(wb, "Master_Registration_File.xlsx");
+        }
+
+        function uploadRegistrationFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const jsonRows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                globalStudentDatabase = {};
+                jsonRows.forEach(row => {
+                    if (!row.CAND_NO) return;
+                    globalStudentDatabase[row.CAND_NO.trim().toUpperCase()] = {
+                        candNo: row.CAND_NO.trim().toUpperCase(),
+                        premsNo: String(row.PREMS_NO || "-").trim(),
+                        name: String(row.NAME || "UNKNOWN").toUpperCase().trim(),
+                        sex: String(row.SEX || "F").toUpperCase().trim(),
+                        comb: String(row.COMBINATION || "").toUpperCase().trim(),
+                        scores: {}
+                    };
+                });
+                alert(`Roster loaded: ${Object.keys(globalStudentDatabase).length} records added.`);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function downloadSubjectTemplate() {
+            const activeSubj = document.getElementById("subjectSelector").value;
+            const studentKeys = Object.keys(globalStudentDatabase);
+            if (studentKeys.length === 0) { alert("Load Step 1 database records first!"); return; }
+            const headers = ["CAND_NO", "NAME", "COMBINATION", `SCORE_${activeSubj}`];
+            const rows = [];
+            studentKeys.forEach(k => {
+                const st = globalStudentDatabase[k];
+                const bp = combinationBlueprints[st.comb];
+                if (bp && (bp.cores.includes(activeSubj) || bp.minors.includes(activeSubj))) {
+                    rows.push([st.candNo, st.name, st.comb, ""]);
+                }
+            });
+            const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Marks_Template");
+            XLSX.writeFile(wb, `Template_${activeSubj}.xlsx`);
+        }
+
+        function uploadSubjectScoreFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const jsonRows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                let scoreFieldName = Object.keys(jsonRows[0] || {}).find(k => k.startsWith("SCORE_"));
+                if (!scoreFieldName) { alert("Invalid template header formatting errors."); return; }
+                const targetSubject = scoreFieldName.replace("SCORE_", "");
+                let counter = 0;
+                jsonRows.forEach(row => {
+                    if (!row.CAND_NO) return;
+                    let cNo = row.CAND_NO.trim().toUpperCase();
+                    if (globalStudentDatabase[cNo]) {
+                        globalStudentDatabase[cNo].scores[targetSubject] = row[scoreFieldName];
+                        counter++;
+                    }
+                });
+                document.getElementById("uploadStatus").innerText = `Merged ${counter} rows for ${targetSubject}`;
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function exportSystemDataJSON() {
+            const students = Object.values(globalStudentDatabase);
+            if (students.length === 0) { alert("No memory data registers found to process compilation."); return; }
+
+            let compileArray = [];
+            students.forEach(st => {
+                const bp = combinationBlueprints[st.comb];
+                if (!bp) return;
+
+                let corePoints = [];
+                let detailedTextParts = [];
+
+                bp.cores.forEach(subj => {
+                    let mark = st.scores[subj];
+                    let grade = scoreToLetterGrade(mark);
+                    corePoints.push(gradePointsMap[grade]);
+                    detailedTextParts.push(`${subj}-${grade}`);
+                });
+
+                bp.minors.forEach(subj => {
+                    let mark = st.scores[subj];
+                    let grade = scoreToLetterGrade(mark);
+                    detailedTextParts.push(`${subj.replace(/_/g, '/')}-${grade}`);
+                });
+
+                let aggregate = corePoints.reduce((a, b) => a + b, 0);
+                let division = "0";
+                if (aggregate >= 3 && aggregate <= 9) division = "I";
+                else if (aggregate >= 10 && aggregate <= 12) division = "II";
+                else if (aggregate >= 13 && aggregate <= 17) division = "III";
+                else if (aggregate >= 18 && aggregate <= 19) division = "IV";
+                else division = "0";
+
+                compileArray.push({
+                    candNo: st.candNo, premsNo: st.premsNo, name: st.name, sex: st.sex, comb: st.comb,
+                    aggt: aggregate, div: division, formattedText: detailedTextParts.join(", ")
+                });
+            });
+
+            compileArray.sort((a, b) => a.aggt - b.aggt);
+            document.getElementById("dataOutputBox").value = JSON.stringify(compileArray);
+            alert("Data calculations packaged! Copy the text from the box below and lock it into your code.");
+        }
+
+        // ==========================================
+        // PUBLIC VIEW MASTER BOARD RENDER LOGIC
+        // ==========================================
+        function renderPublicLedgerFromDatabase() {
+            if (LIVE_STUDENT_DATABASE.length === 0) return;
+
+            let summary = { F: { I: 0, II: 0, III: 0, IV: 0, 0: 0 }, M: { I: 0, II: 0, III: 0, IV: 0, 0: 0 } };
+            const resultsBody = document.getElementById("resultsBody");
+            resultsBody.innerHTML = "";
+
+            LIVE_STUDENT_DATABASE.forEach((st, idx) => {
+                if (summary[st.sex]) {
+                    summary[st.sex][st.div]++;
+                }
+
+                resultsBody.innerHTML += `<tr>
+            <td class="center">${st.candNo}</td>
+            <td class="center">${st.premsNo}</td>
+            <td>${st.name.toUpperCase()}</td>
+            <td class="center">${st.sex}</td>
+            <td class="center">${st.comb}</td>
+            <td class="center">${idx + 1}</td>
+            <td class="center">${st.aggt}</td>
+            <td class="center">${st.div === "0" ? `<span class="status-badge">DIV 0</span>` : st.div}</td>
+            <td>${st.formattedText}</td>
+        </tr>`;
+            });
+
+            // Populate summary box metrics
+            const summaryBody = document.getElementById("summaryBody");
+            summaryBody.innerHTML = "";
+            ["F", "M"].forEach(gender => {
+                let counts = summary[gender];
+                summaryBody.innerHTML += `<tr>
+            <td class="center"><b>${gender}</b></td>
+            <td class="center">${counts.I}</td>
+            <td class="center">${counts.II}</td>
+            <td class="center">${counts.III}</td>
+            <td class="center">${counts.IV}</td>
+            <td class="center">${counts["0"]}</td>
+        </tr>`;
+            });
+
+            summaryBody.innerHTML += `<tr>
+        <td class="center"><b>T</b></td>
+        <td class="center"><b>${summary.F.I + summary.M.I}</b></td>
+        <td class="center"><b>${summary.F.II + summary.M.II}</b></td>
+        <td class="center"><b>${summary.F.III + summary.M.III}</b></td>
+        <td class="center"><b>${summary.F.IV + summary.M.IV}</b></td>
+        <td class="center"><b>${summary.F["0"] + summary.M["0"]}</b></td>
+    </tr>`;
+        }
+
+        function downloadLedgerPDF() {
+            const element = document.getElementById('pdfPrintCanvas');
+            const opt = {
+                margin: [0.3, 0.3, 0.3, 0.3],
+                filename: 'Official_School_FormV_Ledger.pdf',
+                image: { type: 'jpeg', quality: 0.99 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+
+        // Run initial database checks immediately upon loading page view pipeline
+        window.onload = renderPublicLedgerFromDatabase;
+    </script>
+</body>
+
+</html>
