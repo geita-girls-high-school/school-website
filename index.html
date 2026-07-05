@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geita Girls Secondary School - Official Website</title>
+    <!-- Dependencies for PDF download features -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* ==========================================
+           GLOBAL & BRAND IDENTITY STYLES
+           Primary: Purple (#800080), Accent: Gold (#D4AF37)
+           ========================================== */
+        :root {
+            --brand-purple: #800080;
+            --brand-gold: #D4AF37;
+            --dark-purple: #4a004a;
+            --light-bg: #f5f6fa;
+            --text-dark: #2f3640;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 1350px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Top Institutional Banner - Reduced padding size */
+        .top-bar {
+            background-color: var(--brand-purple);
+            color: white;
+            text-align: center;
+            padding: 6px 0;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            border-bottom: 3px solid var(--brand-gold);
+        }
+
+        /* Main Header & Logo Section */
+        header {
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 4px 0;
+        }
+
+        /* Center aligned wrapper layout */
+        .header-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Centered column styling for text and logo alignment */
+        .brand-identity {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            text-align: center;
+        }
+
+        .logo-placeholder {
+            width: 90px;
+            height: 90px;
+            background-color: transparent;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible;
+        }
+
+        .logo-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .school-titles h1 {
+            margin: 0;
+            font-size: 26px;
+            color: var(--brand-purple);
+            letter-spacing: 0.5px;
+        }
+
+        .school-titles p {
+            margin: 4px 0 0 0;
+            font-size: 14px;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        /* Navigation Menu System */
+        nav {
+            background-color: var(--dark-purple);
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-wrapper {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: white;
+            padding: 16px 24px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .nav-btn:hover,
+        .nav-btn.active {
+            background-color: var(--brand-gold);
+            color: var(--dark-purple);
+        }
+
+        /* Hero Banner Section */
+        .hero {
+            background: linear-gradient(rgba(74, 0, 74, 0.8), rgba(128, 0, 128, 0.7)), url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1470') center/cover no-repeat;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .hero h2 {
+            font-size: 30px;
+            margin: 0 0 8px 0;
+            color: var(--brand-gold);
+        }
+
+        .hero p {
+            font-size: 16px;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        /* ==========================================
+           AUTOMATIC DYNAMIC SLIDESHOW / CAROUSEL
+           ========================================== */
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            margin: 30px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            background-color: #1a001a;
+            box-sizing: border-box;
+            padding: 0 60px;
+        }
+
+        .slide-item {
+            position: absolute;
+            top: 0;
+            left: 60px;
+            right: 60px;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide-item.active {
+            opacity: 1;
+            z-index: 2;
+        }
+
+        .slide-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .slide-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+            color: white;
+            padding: 35px 40px;
+            box-sizing: border-box;
+            z-index: 3;
+            border-radius: 0 0 4px 4px;
+        }
+
+        .slide-overlay h4 {
+            margin: 0 0 8px 0;
+            font-size: 24px;
+            color: var(--brand-gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .slide-overlay p {
+            margin: 0;
+            font-size: 16px;
+            color: #f5f6fa;
+            line-height: 1.4;
+        }
+
+        /* Carousel Navigation Dots */
+        .carousel-dots {
+            position: absolute;
+            bottom: 20px;
+            right: 80px;
+            z-index: 10;
+            display: flex;
+            gap: 8px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .dot.active {
+            background-color: var(--brand-gold);
+        }
+
+        /* Statistics Row Component */
+        .stats-bar {
+            background-color: white;
+            padding: 20px 0;
+            margin-top: -15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            margin: 0;
+            font-size: 28px;
+            color: var(--brand-purple);
+        }
+
+        .stat-card p {
+            margin: 5px 0 0 0;
+            font-size: 13px;
+            text-transform: uppercase;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+
+        /* Tab Content Architecture Layouts */
+        .tab-content {
+            display: none;
+            padding: 40px 0;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .panel-card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .panel-card h3 {
+            color: var(--brand-purple);
+            border-bottom: 2px solid var(--brand-gold);
+            padding-bottom: 8px;
+            margin-top: 0;
+        }
+
+        /* Grid Layouts for Results and Downloads */
+        .results-link-grid,
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .result-link-card,
+        .download-card {
+            background: white;
+            border: 2px solid var(--brand-purple);
+            border-radius: 6px;
+            padding: 25px 20px;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            color: var(--brand-purple);
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .result-link-card:hover,
+        .download-card:hover {
+            background-color: var(--brand-purple);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .result-link-card span,
+        .download-card span {
+            font-size: 13px;
+            font-weight: normal;
+            color: #7f8c8d;
+        }
+
+        .result-link-card:hover span,
+        .download-card:hover span {
+            color: #f5f6fa;
+        }
+
+        .download-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        /* Notice Board Elements */
+        .notice-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .notice-item {
+            padding: 15px;
+            border-left: 4px solid var(--brand-purple);
+            background: #f9f9f9;
+            margin-bottom: 15px;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .notice-date {
+            font-size: 12px;
+            color: var(--brand-gold);
+            font-weight: bold;
+        }
+
+        /* Contact Form Fields */
+        .contact-form {
+            display: grid;
+            gap: 15px;
+            max-width: 600px;
+            margin-top: 20px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .submit-btn {
+            background: var(--brand-purple);
+            color: white;
+            padding: 12px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+
+        .submit-btn:hover {
+            background: var(--dark-purple);
+        }
+
+        footer {
+            background-color: var(--dark-purple);
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            font-size: 14px;
+            border-top: 4px solid var(--brand-gold);
+            margin-top: 50px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="top-bar">PRIME MINISTER'S OFFICE • REGIONAL ADMINISTRATION AND LOCAL GOVERNMENT</div>
+    <header>
+        <div class="container header-wrapper">
+            <div class="brand-identity">
+                <div class="logo-placeholder">
+                    <img src="image_45c848.png" alt="GGSS Logo" onerror="this.onerror=null; this.src='logo1.png';">
+                </div>
+                <div class="school-titles">
+                    <h1>GEITA GIRLS SECONDARY SCHOOL</h1>
+                    <p>Center Number: S7342 • Geita Town Council • Tanzania</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container nav-wrapper">
+            <button class="nav-btn active" onclick="switchSchoolTab(event, 'homeTab')">Home</button>
+            <button class="nav-btn" onclick="switchSchoolTab(event, 'aboutTab')">About Us</button>
+            <button class="nav-btn" onclick="switchSchoolTab(event, 'admissionTab')">Admissions</button>
+            <button class="nav-btn" onclick="switchSchoolTab(event, 'resultsTab')">Academic Results</button>
+            <button class="nav-btn" onclick="switchSchoolTab(event, 'noticeTab')">Notice Board</button>
+            <button class="nav-btn" onclick="switchSchoolTab(event, 'contactTab')">Contact Us</button>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <h2>Striving for Academic Excellence & Character Development</h2>
+            <p>Empowering young women through high-standard science, technology, and arts education to shape the leaders
+                of tomorrow.</p>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="stats-bar">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>S7342</h3>
+                    <p>NECTA Center Code</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Girls Only</h3>
+                    <p>School Type</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Geita</h3>
+                    <p>Region Location</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN TAB CONTENT BODIES -->
+    <main class="container" id="mainContentWrapper">
+
+        <!-- TAB 1: HOME PAGE -->
+        <div id="homeTab" class="tab-content active">
+
+            <!-- AUTOMATIC SHOWCASE CAROUSEL -->
+            <div class="carousel-container" id="schoolShowcaseCarousel">
+                <!-- Slides are dynamically loaded by the JavaScript below -->
+                <div class="carousel-dots" id="carouselDotsContainer"></div>
+            </div>
+
+            <div class="panel-card">
+                <h3>Welcome to Geita Girls Secondary School</h3>
+                <p>Geita Girls Secondary School is a premier government institution dedicated to providing high-quality
+                    secondary education for girls. We offer an environment structured to foster discipline, strategic
+                    leadership skills, and elite academic mastery.</p>
+            </div>
+        </div>
+
+        <!-- TAB 2: ABOUT US -->
+        <div id="aboutTab" class="tab-content">
+            <div class="panel-card">
+                <h3>About Our Institution</h3>
+                <p>Founded on principles of empowerment and academic distinction, Geita Girls Secondary School
+                    accommodates students across both Ordinary Level (Form 1 to 4) and Advanced Level ranges. Our
+                    comprehensive educational environment aims to maximize potential in the fields of Science,
+                    Mathematics, and Language streams.</p>
+                <h4 style="color: var(--brand-purple); margin-top:20px;">Our Vision</h4>
+                <p>To be an elite academic powerhouse that cultivates outstanding integrity, self-reliance, and
+                    innovation among young global citizens.</p>
+            </div>
+        </div>
+
+        <!-- TAB 3: ADMISSIONS -->
+        <div id="admissionTab" class="tab-content">
+            <div class="panel-card">
+                <h3>Admissions & Joining Instructions</h3>
+                <p>Selected candidates are required to download, print, and completely fill out the official school
+                    registration packet prior to arrival. Click on the options below to download the specific PDF packet
+                    for your level:</p>
+
+                <div class="download-grid">
+                    <!-- Form One Download Card -->
+                    <a href="pdf/Form_One_Joining_Instructions.pdf" class="download-card"
+                        download="Form_One_Joining_Instructions.pdf">
+                        <div class="download-icon">📄📥</div>
+                        FORM ONE JOINING INSTRUCTIONS
+                        <span>Lower Secondary Registration Packet (PDF)</span>
+                    </a>
+
+                    <!-- Form Five Download Card -->
+                    <a href="pdf/Form_Five_Joining_Instructions.pdf" class="download-card"
+                        download="Form_Five_Joining_Instructions.pdf">
+                        <div class="download-icon">📄📥</div>
+                        FORM FIVE JOINING INSTRUCTIONS
+                        <span>Upper Secondary Registration Packet (PDF)</span>
+                    </a>
+                </div>
+
+                <p style="margin-top: 25px; font-size: 14px; color: #7f8c8d; font-style: italic;">
+                    *Note: Ensure all medical examination pages and declaration sheets are fully filled out and signed
+                    by authorized individuals as stated in the instructions.
+                </p>
+            </div>
+        </div>
+
+        <!-- TAB 4: ACADEMIC RESULTS PORTAL -->
+        <div id="resultsTab" class="tab-content">
+            <div class="panel-card">
+                <h3>Official Examination Result Archives</h3>
+                <p>Select a class level below to view published external, and internal
+                    terminal results metrics.</p>
+
+                <div class="results-link-grid">
+                    <a href="form1_results.html" class="result-link-card" target="_blank">
+                        🏫 FORM ONE RESULTS
+                        <span>View Form I Terminal Examination Results</span>
+                    </a>
+                    <a href="form2_results.html" class="result-link-card" target="_blank">
+                        🏫 FORM TWO RESULTS
+                        <span>View Form II Pre-Mock Assessments</span>
+                    </a>
+                    <a href="form3_results.html" class="result-link-card" target="_blank">
+                        🏫 FORM THREE RESULTS
+                        <span>Not Yet available</span>
+                    </a>
+                    <a href="form4_results.html" class="result-link-card" target="_blank">
+                        🏫 FORM FOUR RESULTS
+                        <span>Not Yet available</span>
+                    </a>
+                    <a href="FormV_Results.html" class="result-link-card" target="_blank">
+                        🏫 FORM FIVE RESULTS
+                        <span>Form V Annual Exam</span>
+                    </a>
+                    <a href="form6_results.html" class="result-link-card" target="_blank">
+                        🏫 FORM SIX RESULTS
+                        <span>NECTA RESULTS</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: NOTICE BOARD -->
+        <div id="noticeTab" class="tab-content">
+            <div class="panel-card">
+                <h3>Announcements & Circulars</h3>
+                <ul class="notice-list">
+                    <li class="notice-item">
+                        <div class="notice-date">July 1, 2026</div>
+                        <strong>Mid-Term Break Announcement</strong>
+                        <p>All students are reminded that the school opens on July 6, 2026 Second term academic year.
+                        </p>
+                    </li>
+                    <li class="notice-item">
+                        <div class="notice-date">June 15, 2026</div>
+                        <strong>Joining Instructions Update</strong>
+                        <p>Advanced Level selection forms can now be accessed via the digital portal directory layout.
+                        </p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- TAB 6: CONTACT US -->
+        <div id="contactTab" class="tab-content">
+            <div class="panel-card">
+                <h3>Get In Touch</h3>
+                <p>Have inquiries regarding operations or admissions? Reach out directly via the structure below.</p>
+
+                <form class="contact-form" onsubmit="event.preventDefault(); alert('Message dispatched!');">
+                    <div class="form-group">
+                        <input type="text" placeholder="Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" placeholder="Email Address" required>
+                    </div>
+                    <div class="form-group">
+                        <textarea rows="5" placeholder="Your Message..." required></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">Send Message</button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Geita Girls Secondary School. All Rights Reserved.</p>
+            <p style="font-size: 12px; color: var(--brand-gold); margin-top: 8px; letter-spacing: 0.5px;">
+                Designed and Maintained by <strong>GGSS ICT DEPARTMENT</strong>
+            </p>
+        </div>
+    </footer>
+    <script>
+        // Core Tab Routing System Switcher with Auto Scroll Functionality
+        function switchSchoolTab(evt, tabId) {
+            const contents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < contents.length; i++) {
+                contents[i].classList.remove("active");
+            }
+            const buttons = document.getElementsByClassName("nav-btn");
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove("active");
+            }
+
+            document.getElementById(tabId).classList.add("active");
+            evt.currentTarget.classList.add("active");
+
+            const contentWrapper = document.getElementById("mainContentWrapper");
+            if (contentWrapper) {
+                const yOffset = -70;
+                const yPosition = contentWrapper.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+                window.scrollTo({
+                    top: yPosition,
+                    behavior: "smooth"
+                });
+            }
+        }
+
+        // ==========================================
+        // SLIDESHOW AUTOMATION ENGINE CONFIGURATION
+        // ==========================================
+        const slidesData = [
+            {
+                img: "FormVI_Graduation.jpg",
+                title: "Form Six Graduation Ceremony",
+                desc: "Celebrating academic success and leadership development milestone achievements for our graduation cohorts."
+            },
+            {
+                img: "chemistry_dept.jpg",
+                title: "Chemistry Department",
+                desc: "Fostering scientific inquiry through practical laboratory experiments, titration practice, and hands-on chemical analysis."
+            },
+            {
+                img: "ict_dept.jpg",
+                title: "ICT & Technology Department",
+                desc: "Empowering students with modern computing skills, programming logic, and digital literacy in a fully equipped tech environment."
+            },
+            {
+                img: "mathematics_dept.jpg",
+                title: "Mathematics Department",
+                desc: "Building strong analytical foundations, problem-solving skills, and advanced mathematical reasoning."
+            },
+            {
+                img: "language_dept.jpg",
+                title: "Language Department",
+                desc: "Enhancing communication, critical reading, and literary expression across global and local languages."
+            },
+            {
+                img: "sports_dept.jpg",
+                title: "Sports & Athletics Department",
+                desc: "Promoting physical fitness, teamwork, and competitive excellence through school sports, football matches, and talent growth."
+            },
+            {
+                img: "business_dept.jpg",
+                title: "Business & Economics Department",
+                desc: "Preparing future leaders with fundamental insights into financial management, commercial systems, and global economic structures."
+            }
+        ];
+
+        let currentSlideIndex = 0;
+        let slideTimer;
+
+        function initializeSchoolCarousel() {
+            const container = document.getElementById("schoolShowcaseCarousel");
+            const dotsContainer = document.getElementById("carouselDotsContainer");
+
+            dotsContainer.innerHTML = "";
+
+            slidesData.forEach((slide, idx) => {
+                const slideDiv = document.createElement("div");
+                slideDiv.className = `slide-item ${idx === 0 ? 'active' : ''}`;
+                slideDiv.id = `schoolSlide_${idx}`;
+
+                slideDiv.innerHTML = `
+                    <img src="${slide.img}" class="slide-image" alt="${slide.title}" onerror="this.src='school-img.png';">
+                    <div class="slide-overlay">
+                        <h4>${slide.title}</h4>
+                        <p>${slide.desc}</p>
+                    </div>
+                `;
+                container.insertBefore(slideDiv, dotsContainer);
+
+                const dot = document.createElement("div");
+                dot.className = `dot ${idx === 0 ? 'active' : ''}`;
+                dot.onclick = () => jumpToSelectedSlide(idx);
+                dotsContainer.appendChild(dot);
+            });
+
+            startSlideShowTimer();
+        }
+
+        function startSlideShowTimer() {
+            slideTimer = setInterval(() => {
+                let nextIdx = (currentSlideIndex + 1) % slidesData.length;
+                jumpToSelectedSlide(nextIdx);
+            }, 4000);
+        }
+
+        function jumpToSelectedSlide(targetIdx) {
+            document.getElementById(`schoolSlide_${currentSlideIndex}`).classList.remove("active");
+            document.querySelectorAll(".carousel-dots .dot")[currentSlideIndex].classList.remove("active");
+
+            currentSlideIndex = targetIdx;
+            document.getElementById(`schoolSlide_${currentSlideIndex}`).classList.add("active");
+            document.querySelectorAll(".carousel-dots .dot")[currentSlideIndex].classList.add("active");
+
+            clearInterval(slideTimer);
+            startSlideShowTimer();
+        }
+
+        window.addEventListener("DOMContentLoaded", initializeSchoolCarousel);
+    </script>
+</body>
+
+
+</html>
