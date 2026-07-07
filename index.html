@@ -425,17 +425,25 @@
 
     <div class="top-bar">PRIME MINISTER'S OFFICE • REGIONAL ADMINISTRATION AND LOCAL GOVERNMENT</div>
     <header>
-        <div class="container header-wrapper">
-            <div class="brand-identity">
-                <div class="logo-placeholder">
-                    <img src="image_45c848.png" alt="GGSS Logo" onerror="this.onerror=null; this.src='logo1.png';">
-                </div>
-                <div class="school-titles">
-                    <h1>GEITA GIRLS SECONDARY SCHOOL</h1>
-                    <p>Center Number: S7342 • Geita Municipal Council • Tanzania</p>
-                </div>
-            </div>
-        </div>
+       <!-- ==========================================
+     HEADER / HERO TITLE SECTION
+     ========================================== -->
+<div class="brand-header" style="text-align: center; padding: 20px 10px;">
+    <!-- School Logo -->
+    <img src="logo1.png" alt="GGSS Logo" style="max-height: 100px; margin-bottom: 15px;">
+    
+    <!-- Scrolling School Title -->
+    <marquee behavior="scroll" direction="left" scrollamount="6" onmouseover="this.stop();" onmouseout="this.start();">
+        <h1 style="color: var(--brand-blue, #5dade2); font-size: 2.5rem; font-weight: bold; margin: 0; white-space: nowrap;">
+            GEITA GIRLS SECONDARY SCHOOL
+        </h1>
+    </marquee>
+    
+    <!-- Subtitle Center Info -->
+    <p style="color: #555; font-size: 1.1rem; margin-top: 8px;">
+        Center Number: S7342 &bull; Geita Municipal Council &bull; Tanzania
+    </p>
+</div>
     </header>
 
     <nav>
